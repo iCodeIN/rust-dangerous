@@ -27,11 +27,14 @@ simd = ["bytecount"]
 unicode = ["unicode-width"]
 # Enables full context backtraces.
 full-context = ["alloc"]
+# Enables error terminal printing support.
+terminal = ["std", "termcolor", "unicode"]
 # Enables const generic support.
 # Will be removed in `1.51`.
 unstable-const-generics = []
 
 [dependencies]
+termcolor = { version = "1.1", optional = true }
 zc = { version = "0.3", optional = true, default-features = false }
 bytecount = { version = "0.6", optional = true }
 unicode-width = { version = "0.1", optional = true }
