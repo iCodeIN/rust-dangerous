@@ -1,4 +1,3 @@
-use core::convert::TryInto;
 use core::slice::Iter as SliceIter;
 use core::{iter, str};
 
@@ -303,49 +302,21 @@ impl<'i> Bytes<'i> {
         Ok((String::new(consumed, self.bound()), self.end()))
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // FIXME: use `split_array` once stable in 1.51
-
     #[inline(always)]
-    pub(crate) fn split_arr_2<E>(self, operation: &'static str) -> Result<([u8; 2], Bytes<'i>), E>
+    pub(crate) fn split_array<E, const N: usize>(
+        self,
+        operation: &'static str,
+    ) -> Result<([u8; N], Bytes<'i>), E>
     where
         E: From<ExpectedLength<'i>>,
     {
-        match self.split_at(2, operation) {
-            Ok((head, tail)) => Ok((head.as_dangerous().try_into().unwrap(), tail)),
-            Err(err) => Err(err),
-        }
-    }
-
-    #[inline(always)]
-    pub(crate) fn split_arr_4<E>(self, operation: &'static str) -> Result<([u8; 4], Bytes<'i>), E>
-    where
-        E: From<ExpectedLength<'i>>,
-    {
-        match self.split_at(4, operation) {
-            Ok((head, tail)) => Ok((head.as_dangerous().try_into().unwrap(), tail)),
-            Err(err) => Err(err),
-        }
-    }
-
-    #[inline(always)]
-    pub(crate) fn split_arr_8<E>(self, operation: &'static str) -> Result<([u8; 8], Bytes<'i>), E>
-    where
-        E: From<ExpectedLength<'i>>,
-    {
-        match self.split_at(8, operation) {
-            Ok((head, tail)) => Ok((head.as_dangerous().try_into().unwrap(), tail)),
-            Err(err) => Err(err),
-        }
-    }
-
-    #[inline(always)]
-    pub(crate) fn split_arr_16<E>(self, operation: &'static str) -> Result<([u8; 16], Bytes<'i>), E>
-    where
-        E: From<ExpectedLength<'i>>,
-    {
-        match self.split_at(16, operation) {
-            Ok((head, tail)) => Ok((head.as_dangerous().try_into().unwrap(), tail)),
+        match self.split_at(N, operation) {
+            Ok((head, tail)) => {
+                let ptr = head.as_dangerous().as_ptr() as *const [u8; N];
+                // SAFETY: safe as we took only N amount and u8 is `Copy`.
+                let arr = unsafe { *ptr };
+                Ok((arr, tail))
+            }
             Err(err) => Err(err),
         }
     }
