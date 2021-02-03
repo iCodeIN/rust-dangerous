@@ -124,6 +124,7 @@ fn trigger_expected_value<E: Error<'static>>() -> E {
         .unwrap_err()
 }
 
+#[cfg(feature = "full-context")]
 fn trigger_expected_value_str<E: Error<'static>>() -> E {
     input!("hello world")
         .read_all(|r| r.context("hi", |r| r.consume("123")))
